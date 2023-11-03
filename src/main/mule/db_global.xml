@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="ef22431d-3386-4034-b13e-3f00460d671c" file="properties\config-qa.yaml" key="Siva@193654" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="0a82f794-045b-4e76-803b-420aab619b25" file="properties\config-qa.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="402a9cab-9bff-4948-8fa2-05fc5f5269a2" file="properties\config-common.yaml" />
+	<http:listener-config name="ic-db-sapi-httpListenerConfig1">
+        <http:listener-connection host="0.0.0.0" port="8082" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="jks" path="keystore\server-keystore.jks" keyPassword="sivakumar" password="sivakumar" alias="mule-server"/>
+			</tls:context>
+		</http:listener-connection>
+    </http:listener-config>
+    <configuration doc:name="Configuration" doc:id="b6c4d0c7-cc06-4019-ba6e-4645e9b8bd9b" defaultErrorHandler-ref="db_commonerrorsError_Handler" />
+    <db:config name="Database_Config1" doc:name="Database Config" doc:id="2f30f171-489b-42d0-92d2-0d0bf4028604" >
+		<db:my-sql-connection host="sql.freedb.tech" port="3306" user="${secure::user}" password="${secure::password}" database="${secure::database}" />
+	</db:config>
+	<api-gateway:autodiscovery apiId="19081767" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="f0a04e23-ad66-47cc-9192-6ef7d2f0a5cd" flowRef="ic-db-sapi-main" />
+</mule>

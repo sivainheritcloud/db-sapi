@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<error-handler name="db_commonerrorsError_Handler" doc:id="3a675ca2-f894-472f-a8fc-a10d8f515a4a" >
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="adff882a-043f-4719-bdb0-d469d011b987" type="APIKIT:BAD_REQUEST">
+			<logger level="INFO" doc:name="Logger" doc:id="3b930826-a0e0-480e-8cc0-2de9f7617c91" />
+			<ee:transform doc:name="Transform Message" doc:id="e8d9ddd8-83a4-40fa-aa23-34741d832e91" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="vErrorMapping" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"httpStatus": 400,
+	"errorCode": "APIKIT-400-DATA-ERROR",
+	"errorDescription": error.description default "Encountered a Data error while processing a request"
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="258852d4-5d3a-4013-b2dd-e2a5f320fe7e" name="db_commonerrorsSub_Flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="fee83e07-6b71-4cfe-bc6f-5d5933730c7b" type="APIKIT:NOT_FOUND">
+			<logger level="INFO" doc:name="Logger" doc:id="3f3e1184-7a20-4dd8-9f06-250d7f2e1104" />
+			<ee:transform doc:name="Transform Message" doc:id="0d473b52-6aa9-4bbf-b58a-9d30da040909" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="vErrorMapping" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"httpStatus": 404,
+	"errorCode": "APIKIT-404-NOT-FOUND-ERROR",
+	"errorDescription": "The request was rejected. Resource not found."
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="5b83ee93-fe64-4373-83ce-4ccf40c69842" name="db_commonerrorsSub_Flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="57643278-277a-4714-9884-56620174b170" type="APIKIT:METHOD_NOT_ALLOWED">
+			<logger level="INFO" doc:name="Logger" doc:id="2ce302bd-192a-40b2-95c3-1ece214e1b6b" />
+			<ee:transform doc:name="Transform Message" doc:id="2d0d91ff-7747-4d28-9696-8eae486487ab" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="vErrorMapping" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"httpStatus": 405,
+	"errorCode": "APIKIT-405-METHOD-NOT-ALLOWED-ERROR",
+	"errorDescription": "The request was rejected. Method is not Allowed."
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="5cb543fa-2c24-4e3e-9f6c-a499da7baaf9" name="db_commonerrorsSub_Flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2b08bb34-6197-4e8e-9faf-9ddfdd35286b" type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<logger level="INFO" doc:name="Logger" doc:id="46dacce7-9432-4bb1-864a-96695efa18bf" />
+			<ee:transform doc:name="Transform Message" doc:id="4207d421-0448-41b4-b0d4-acf11dd44fa2" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="vErrorMapping" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"httpStatus": 415,
+	"errorCode": "APIKIT-415-UNSUPPORTED-MEDIATYPE-ERROR",
+	"errorDescription": "Encountered an error while processing a request. Unsupported media type"
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="70cd4583-92e0-4208-a3e5-64a392dc9299" name="db_commonerrorsSub_Flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="396cb079-f601-470c-98ba-622409d23482" type="APIKIT:NOT_IMPLEMENTED">
+			<logger level="INFO" doc:name="Logger" doc:id="2a7642a1-5add-4c2f-98e9-3f50f9f987b2" />
+			<ee:transform doc:name="Transform Message" doc:id="7981ce91-5074-43cc-81d7-6d4eb320b421" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="vErrorMapping" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"httpStatus": 501,
+	"errorCode": "APIKIT-501-NOT-IMPLEMENTED-ERROR",
+	"errorDescription": "Encountered an error while processing a lead request. Not implemented error"
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="3c2e2670-932c-49d0-a74d-1757b77d5c68" name="db_commonerrorsSub_Flow"/>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="50286952-7189-4632-875d-0333e3fda20a" type="APIKIT:NOT_ACCEPTABLE">
+			<logger level="INFO" doc:name="Logger" doc:id="f62afe2e-75b9-473f-bb78-620536fad88b" />
+			<ee:transform doc:name="Transform Message" doc:id="9a785495-0953-4ad0-9079-aa2223abb89d" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="vErrorMapping" ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"httpStatus": 406,
+	"errorCode": "APIKIT-406-NOT-ACCEPTABLE-ERROR",
+	"errorDescription": "Encountered an error while processing a lead request. Not acceptable error"
+}]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<flow-ref doc:name="Flow Reference" doc:id="e6eb2a3b-0cd2-4600-85de-1a554c267f02" name="db_commonerrorsSub_Flow"/>
+		</on-error-propagate>
+	</error-handler>
+	<sub-flow name="db_commonerrorsSub_Flow" doc:id="ce98898c-0cd2-4624-94b7-aae40341c41e" >
+		<logger level="ERROR" doc:name="Logger" doc:id="fa8bd46d-bea0-42b2-ad3c-783806c139cf" message='"Error - HTTP Status Code:" #[vars.vErrorMapping.httpStatus] "Error Message Description :" #[vars.vErrorMapping.errorDescription]'/>
+		<set-variable value="#[vars.vErrorMapping.httpStatus]" doc:name="Set Variable" doc:id="597bf402-89eb-4cb1-a710-3be676fe158f" variableName="httpstatus"/>
+		<ee:transform doc:name="Transform Message" doc:id="4775d9a6-3438-429f-abf9-ab89c8eacddb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	is_success: false,
+    errors:[
+    {
+        error_code: vars.vErrorMapping.errorCode,
+        error_message: vars.vErrorMapping.errorDescription
+    }]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

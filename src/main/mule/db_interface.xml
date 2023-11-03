@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <apikit:config name="ic-db-sapi-config" api="ic-db-sapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="ic-db-sapi-main">
+        <http:listener config-ref="ic-db-sapi-httpListenerConfig1" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="ic-db-sapi-config" />
+        <error-handler ref="db_commonerrorsError_Handler" />
+    </flow>
+    <flow name="ic-db-sapi-console">
+        <http:listener config-ref="ic-db-sapi-httpListenerConfig1" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="ic-db-sapi-config" />
+        <error-handler ref="db_commonerrorsError_Handler" />
+    </flow>
+    <flow name="put:\task\(id):application\json:ic-db-sapi-config">
+        <flow-ref doc:name="Flow Reference to update_id_implementation" doc:id="a1a6b200-3263-45c9-b147-df8291b379d7" name="update_id_task_implementation" />
+    </flow>
+    <flow name="delete:\task\(id):ic-db-sapi-config">
+        <flow-ref doc:name="Flow Reference to delete_id_implementation" doc:id="6a34551f-5566-4eb6-8650-80c16ef974ed" name="delete_id_task_implementation" />
+    </flow>
+    <flow name="get:\task:ic-db-sapi-config">
+        <flow-ref doc:name="Flow Reference to get_All_implementation" doc:id="f7890515-24ae-4f41-af2f-45d5f9360a4c" name="get_all_task_implementation" />
+    </flow>
+    <flow name="get:\task\(id):ic-db-sapi-config">
+        <flow-ref doc:name="Flow Reference to get_by_id_implementation" doc:id="53107962-0434-4f2b-9b84-02946ebdffca" name="get_by_id_task_implementation" />
+    </flow>
+    <flow name="post:\task:application\json:ic-db-sapi-config">
+        <flow-ref doc:name="Flow Reference to create_implementation" doc:id="0fe01b65-1c53-4a81-a715-c1f9bfd24af4" name="create_new_task_implementation" />
+    </flow>
+</mule>

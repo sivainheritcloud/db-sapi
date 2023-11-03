@@ -1,0 +1,10 @@
+{
+"OwnerId": "0055j000008YrBjAAK",
+"Priority":"High",
+"Description": "we have to send an email",
+"Status": "completed",
+"Subject": "sending email",
+"Sync_new_record_to_sfdc": "true",
+"Sync_update_record_to_sfdc": "true",
+"External_id": "6969"
+}

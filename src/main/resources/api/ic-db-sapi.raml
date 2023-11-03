@@ -1,0 +1,79 @@
+#%RAML 1.0
+title: ic-db-sapi
+description: package with collection of db System APIs for IC integration
+traits:
+  headers:
+    !include /traits/Traits.raml
+
+  trackingParams:
+    headers:
+      X-Correlation-ID:
+        description: A unique identifier for this message, to enable tracking, reporting, and correlation.
+        type: string
+        required: true  
+
+resourceTypes:
+  collection: !include /resourceTypes/Collection.raml
+
+uses:
+  errorDataType:  /resources/libraries/ErrorDataTypes.raml
+  getAllTasks: /resources/libraries/GetAllTasksDataTypes.raml
+  getSingleTask: /resources/libraries/GetSingleTaskDataTypes.raml
+  updateTask: /resources/libraries/UpdateDataType.raml
+  createTask: /resources/libraries/CreateDatatype.raml
+  deleteDataTypes: /resources/libraries/DeleteDataTypes.raml
+
+/task:
+  is: [headers,trackingParams]  
+  description: used to add new task
+  type:
+    collection:
+      post-request-schema:
+        createTask.post_task_request
+      post-request-example: 
+        !include examples/requests/createDbTask.json
+      post-response-schema: 
+        createTask.post_task_response
+      post-response-example: 
+        !include examples/responses/postTaskExample.json
+      get-response-schema: 
+        getAllTasks.get_all_tasks_response
+      get-response-example: 
+        !include examples/responses/getAllTaskExample.json
+
+
+      errors-schema: errorDataType.error
+  get:
+    description: to get all created tasks
+  post:
+    description: to create new task
+  /{id}:
+    is: [headers,trackingParams]
+    description: used to retrieve single task record
+    type:
+      collection:
+        get-response-schema:
+          getSingleTask.Single_task_details
+        get-response-example: 
+          !include examples/responses/getSingleTaskExample.json
+        delete-response-schema: 
+          deleteDataTypes.delete_task_response
+        delete-response-example: 
+          !include examples/responses/deletionTaskExample.json
+        put-request-schema: 
+          updateTask.update_task_request
+        put-request-example: 
+          !include examples/requests/updateDbTask.json
+        put-response-schema: 
+          updateTask.update_task_response
+        put-response-example:
+          !include examples/responses/updateTaskExample.json  
+        errors-schema: errorDataType.error
+
+    get:
+      description: fetching particular task by id
+    delete:
+      description: deleting particular task by id
+    put:
+      description: updating particular task by id  
+  

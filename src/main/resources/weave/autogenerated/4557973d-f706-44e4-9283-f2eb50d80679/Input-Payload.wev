@@ -1,0 +1,10 @@
+%dw 2.0
+
+type auto_4557973d_f706_44e4_9283_f2eb50d80679_Input_Payload = {
+  sync_update_record_to_sfdc: String, 
+  sync_new_record_to_sfdc: String, 
+  external_id: String, 
+  id: Number, 
+  _?: Any
+} {"description": "updating an task"}
+

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	
+	<sub-flow name="create_new_task_implementation" doc:id="34a8a71b-ebb2-4ac8-8f8a-b3cabbc322f9" >
+		<logger level="INFO" doc:name="creation of new task for db implementation flow started" doc:id="5816dba8-6d7f-4171-9f92-08a63b9da5a8" message="creation of new task for db implementation flow started"/>
+		<db:insert doc:name="used to insert new record into db" doc:id="67b3ecd6-9349-4bca-943f-393ae1fccc66" config-ref="Database_Config1">
+			<db:sql ><![CDATA[INSERT INTO freedb_sivakumar.TASKS
+(OwnerId, Priority, Description, Status, Subject, Sync_new_record_to_sfdc, Sync_update_record_to_sfdc, External_id,Created_at)
+VALUES(:OwnerId, :Priority, :Description, :Status,:Subject, :Sync_new, :Sync_update,:External_id,:Created_at); 
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"OwnerId": payload.owner_id,
+	"Priority": payload.priority,
+	"Description": payload.description,
+	"Status": payload.status,
+	"Subject": payload.subject,
+	"Sync_new": payload.sync_new_record_to_sfdc,
+	"Sync_update": payload.sync_update_record_to_sfdc,
+	"External_id": payload.external_id,
+	"Created_at": now()
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Dw set to get create response" doc:id="f4cfa824-bd5a-4804-b989-8eb7ed6f0fda">
+			<ee:message>
+				<ee:set-payload resource="dwl/postoutput.dwl" />
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="creation of new task for db implementation flow ended" doc:id="7461df19-9593-467a-8a43-376d371b4d58" message='creation of new task for db implementation flow ended'/>
+	</sub-flow>
+	<sub-flow name="get_all_task_implementation" doc:id="9f8c69e4-61bb-48ed-a28a-c9f14ce32918" >
+		<logger level="INFO" doc:name="get All created tasks of db implementation flow started" doc:id="4efa7639-1e3b-4a85-a412-1f01f7fd823a" message="get All created tasks of db implementation flow started"/>
+		<db:select doc:name="used to select all task related records from db" doc:id="b9dee7c9-bcb6-41ba-b79a-52a76c0103e7" config-ref="Database_Config1">
+			<db:sql ><![CDATA[SELECT id,OwnerId, Priority, Description, Status, Subject, Sync_new_record_to_sfdc, Sync_update_record_to_sfdc, External_id
+FROM freedb_sivakumar.TASKS;
+]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Dw set to get all task response" doc:id="951a858d-6f86-40f0-9d86-c33efd45452c">
+			<ee:message>
+				<ee:set-payload resource="dwl/getAll.dwl" />
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="get All created tasks of db implementation flow ended" doc:id="915a654a-1c7f-47b3-b719-e9f6b743fb48" message="get All created tasks of db implementation flow ended"/>
+	</sub-flow>
+	<sub-flow name="get_by_id_task_implementation" doc:id="c9ba2ba6-49e6-4e59-b0c7-508103aea3f8" >
+		<logger level="INFO" doc:name="retriving a particular task record by id from db implementation flow started" doc:id="44ce0b39-78be-4c4f-a252-4568f0f7095a" message="retriving a particular task record by id from db implementation flow started"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="storing uriParams id to get" doc:id="9d9d2cd3-7850-45f9-8c91-1e99f3dcf093" variableName="id" />
+		<db:query-single doc:name="retriving Single record from db " doc:id="07b43652-b645-443f-9fcb-4b21dcdebea2" config-ref="Database_Config1" target="vGet">
+			<db:sql ><![CDATA[SELECT * FROM freedb_sivakumar.TASKS WHERE id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"id": vars.id
+}]]]></db:input-parameters>
+		</db:query-single>
+		<choice doc:name="Choice" doc:id="e9654a8f-a3f4-47f7-8ed5-fed22dcddedd" >
+			<when expression="#[vars.vGet.id == Null]">
+				<ee:transform doc:name="error response for get by id" doc:id="94e5e25a-1807-4ce4-913e-7b5753e51463">
+			<ee:message>
+						<ee:set-payload resource="dwl/getById_error.dwl" />
+			</ee:message>
+					<ee:variables >
+					</ee:variables>
+		</ee:transform>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger to save input as payload" doc:id="bff4db70-a4eb-425c-8910-149d9f36c3b8" message="#[payload]"/>
+				<ee:transform doc:name="Dw set to get single record as response" doc:id="c702e868-8732-4f8a-951e-c3a534cd4e97">
+			<ee:message>
+						<ee:set-payload resource="dwl/getById_output.dwl" />
+			</ee:message>
+					<ee:variables >
+					</ee:variables>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="retriving a particular task record by id from db implementation flow ended" doc:id="484df143-da09-4faf-b130-8e71f345d6eb" message="retriving a particular task record by id from db implementation flow ended"/>
+	</sub-flow>
+	<sub-flow name="delete_id_task_implementation" doc:id="939c20d3-aa5c-4b17-8c4f-e779f203df30" >
+		<logger level="INFO" doc:name="deletion of particular task record table from db implementation flow started" doc:id="00e1f6e2-60ad-4fb0-b4d0-184facd4f359" message="deletion of particular task record table from db implementation flow started"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="storing uriParams id to delete" doc:id="47e703b5-3a2f-40d2-955b-104de4897b88" variableName="id"/>
+		<db:query-single doc:name="retriving Single record from db to be delete" doc:id="0dd6bcf1-eb65-47d9-8f45-4c8a3d06c67e" config-ref="Database_Config1" target="vGet">
+			<db:sql ><![CDATA[SELECT * FROM freedb_sivakumar.TASKS WHERE id = :id;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"id":vars.id
+}]]]></db:input-parameters>
+		</db:query-single>
+		<choice doc:name="Choice" doc:id="d1a1aa46-68b9-4df5-a803-d9b1f96ac897" >
+			<when expression="#[sizeOf(vars.vGet) == 0]">
+				<ee:transform doc:name="error response for delete by id" doc:id="c9ba50b9-a76e-41a0-91c4-f281ab0df18f" >
+					<ee:message >
+						<ee:set-payload resource="dwl/deleteById_error.dwl" />
+					</ee:message>
+					<ee:variables >
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<db:delete doc:name="used to delete a particular record " doc:id="538ecd00-898c-440f-b139-450dc6461c59" config-ref="Database_Config1">
+			<db:sql><![CDATA[DELETE FROM freedb_sivakumar.TASKS WHERE id = :id]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	"id": vars.id
+}]]]></db:input-parameters>
+		</db:delete>
+				<ee:transform doc:name="success response for deleted by id record" doc:id="1a4463c1-9beb-4eda-ba47-d6033bef68e4">
+			<ee:message>
+						<ee:set-payload resource="dwl/deleteById_output.dwl" />
+			</ee:message>
+					<ee:variables >
+					</ee:variables>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="deletion of particular task record table from db implementation flow ended" doc:id="5134c83b-7e03-421f-acd4-c2c3ba9220b8" message="deletion of particular task record table from db implementation flow ended"/>
+	</sub-flow>
+	<sub-flow name="update_id_task_implementation" doc:id="4557973d-f706-44e4-9283-f2eb50d80679" >
+		<logger level="INFO" doc:name="updating a particular task from db implementation flow started" doc:id="ac30502e-7ada-4a6d-adff-93fb28ca680b" message="updating a particular task from db implementation flow started"/>
+		<set-variable value="#[attributes.uriParams.id]" doc:name="storing uriParams id to update" doc:id="838abbac-a387-409b-813a-0f66cfb677c5" variableName="id"/>
+		<db:query-single doc:name="retriving Single record from db to be update" doc:id="8fb904d0-9415-43ce-b8c0-38133e962439" config-ref="Database_Config1" target="vGet">
+			<db:sql ><![CDATA[SELECT * FROM freedb_sivakumar.TASKS WHERE id = :id;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"id":vars.id
+}]]]></db:input-parameters>
+		</db:query-single>
+		<choice doc:name="Choice" doc:id="f0e522cb-538b-4dc3-96d0-cbf9ec5cf0bc" >
+			<when expression="#[isEmpty(vars.vGet)]">
+				<ee:transform doc:name="error response for update by id" doc:id="082832a3-4c1a-4673-98aa-65ae9da3b627" >
+					<ee:message >
+						<ee:set-payload resource="dwl/upadteById_error.dwl" />
+					</ee:message>
+					<ee:variables >
+					</ee:variables>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<db:update doc:name="used to update particular record" doc:id="534148a7-fcd6-4043-81be-bc4a14060ca8" config-ref="Database_Config1">
+			<db:sql><![CDATA[UPDATE freedb_sivakumar.TASKS
+SET OwnerId=:OwnerId, Priority=:Priority, Description=:Description, Status=:Status, Subject=:Subject, Sync_new_record_to_sfdc=:Sync_new_record_to_sfdc, Sync_update_record_to_sfdc=:Sync_update_record_to_sfdc, External_id=:External_id,Updated_at=:Updated_at
+WHERE id= :id;]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	"id":vars.id,
+	"OwnerId": payload.owner_id,
+	"Priority":payload.priority,
+	"Description":payload.description,
+	"Status":payload.status,
+	"Subject":payload.subject,
+	"Sync_new_record_to_sfdc":payload.sync_new_record_to_sfdc,
+	"Sync_update_record_to_sfdc":payload.sync_update_record_to_sfdc,
+	"External_id":payload.external_id,
+	"Updated_at": now()
+}]]]></db:input-parameters>
+		</db:update>
+				<ee:transform doc:name="success response of update particular record" doc:id="3e8b6f1d-ba8b-4d58-9991-2a10a4b63528">
+			<ee:message>
+						<ee:set-payload resource="dwl/updateById_output.dwl" />
+			</ee:message>
+					<ee:variables >
+					</ee:variables>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="updating a particular task from db implementation flow ended" doc:id="77df67b2-7caf-4705-a1a5-52efed034d89" message="updating a particular task from db implementation flow ended"/>
+	</sub-flow>
+</mule>
